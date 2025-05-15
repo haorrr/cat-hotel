@@ -1,0 +1,73 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+// Context
+import { AuthProvider } from './contexts/AuthContext';
+
+// Components
+import Header from './components/Header';
+import Footer from './components/Footer';
+import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
+
+// Pages
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import CatList from './pages/CatList';
+import BookRoom from './pages/BookRoom';
+import BookingSuccess from './pages/BookingSuccess';
+import NotFound from './pages/NotFound';
+
+// Styles
+import './App.css';
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <div className="d-flex flex-column min-vh-100">
+          <Header />
+          <main className="flex-grow-1">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+
+              {/* Protected Routes */}
+              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/cats" element={<PrivateRoute><CatList /></PrivateRoute>} />
+              <Route path="/book-room" element={<PrivateRoute><BookRoom /></PrivateRoute>} />
+              <Route path="/booking-success" element={<PrivateRoute><BookingSuccess /></PrivateRoute>} />
+
+              {/* Admin Routes */}
+              <Route path="/admin/*" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+
+              {/* Not Found */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </AuthProvider>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </Router>
+  );
+}
+
+// Placeholder component for Admin Panel
+const AdminPanel = () => {
+  return (
+    <div className="container py-5">
+      <h1>Admin Panel</h1>
+      <p>Trang quản trị viên đang được phát triển.</p>
+    </div>
+  );
+};
+
+export default App;

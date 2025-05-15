@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meow Hotel - Khách sạn cao cấp cho mèo cưng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <!-- Thêm div root để React render vào khi chạy ở chế độ React -->
+    <div id="root">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <nav class="navbar">
+                    <div class="logo">
+                        <img src="logo.png" alt="Meow Hotel Logo" class="logo-img">
+                        <span>Meow Hotel</span>
+                    </div>
+                    <div class="nav-links" id="navLinks">
+                        <span class="close-menu" onclick="closeMenu()"><i class="fas fa-times"></i></span>
+                        <ul>
+                            <li><a href="#home" class="active">Trang chủ</a></li>
+                            <li><a href="#rooms">Phòng & Giá</a></li>
+                            <li><a href="#services">Dịch vụ</a></li>
+                            <li><a href="#gallery">Thư viện</a></li>
+                            <li><a href="#about">Giới thiệu</a></li>
+                            <li><a href="#contact">Liên hệ</a></li>
+                        </ul>
+                    </div>
+                    <div class="auth-buttons">
+                        <a href="login.html" class="btn btn-outline">Đăng nhập</a>
+                        <a href="register.html" class="btn btn-primary">Đăng ký</a>
+                    </div>
+                    <div class="menu-icon" onclick="openMenu()">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero" id="home">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Thiên đường nghỉ dưỡng <span class="highlight">cho mèo cưng</span> của bạn</h1>
+                    <p>Chăm sóc chu đáo và không gian thoải mái cho người bạn lông xù yêu quý khi bạn vắng nhà</p>
+                    <div class="hero-buttons">
+                        <a href="#rooms" class="btn btn-primary">Xem phòng</a>
+                        <a href="#booking" class="btn btn-secondary">Đặt phòng ngay</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="hero-cat.png" alt="Happy Cat">
+                </div>
+            </div>
+            <div class="wave">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                    <path fill="#ffffff" fill-opacity="1" d="M0,128L48,117.3C96,107,192,85,288,90.7C384,96,480,128,576,149.3C672,171,768,181,864,165.3C960,149,1056,107,1152,96C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Tại sao chọn <span class="highlight">Meow Hotel</span>?</h2>
+                    <p>Chúng tôi cung cấp dịch vụ lưu trú và chăm sóc mèo hàng đầu với nhiều tiện ích</p>
+                </div>
+                <div class="features-container">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <h3>Chất lượng 5 sao</h3>
+                        <p>Phòng ở sang trọng và tiện nghi với không gian thoải mái nhất cho mèo cưng</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3>Chăm sóc y tế 24/7</h3>
+                        <p>Đội ngũ bác sĩ thú y luôn sẵn sàng hỗ trợ mọi vấn đề sức khỏe</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <h3>Camera theo dõi</h3>
+                        <p>Xem mèo cưng của bạn mọi lúc mọi nơi qua ứng dụng di động</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3>Thực đơn đa dạng</h3>
+                        <p>Thức ăn tươi ngon, đa dạng và được chuẩn bị riêng cho từng mèo</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rooms Section -->
+        <section class="rooms" id="rooms">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Phòng <span class="highlight">cao cấp</span> cho mèo</h2>
+                    <p>Lựa chọn phòng phù hợp nhất cho người bạn lông xù của bạn</p>
+                </div>
+                <div class="rooms-container">
+                    <div class="room-card">
+                        <div class="room-image">
+                            <img src="standard-room.jpg" alt="Standard Room">
+                            <div class="room-tag">Phổ biến</div>
+                        </div>
+                        <div class="room-content">
+                            <h3>Phòng Tiêu chuẩn</h3>
+                            <div class="room-features">
+                                <span><i class="fas fa-ruler-combined"></i> 1.2m²</span>
+                                <span><i class="fas fa-cat"></i> 1 mèo</span>
+                            </div>
+                            <p>Phòng tiêu chuẩn với đầy đủ tiện nghi cơ bản cho mèo cưng của bạn.</p>
+                            <div class="room-price">
+                                <span class="price">200.000đ</span>
+                                <span class="unit">/ ngày</span>
+                            </div>
+                            <div class="card-footer">
+                                <a href="#booking" class="btn btn-primary btn-sm">Đặt ngay</a>
+                                <a href="room-detail.html" class="btn btn-outline btn-sm">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="room-card">
+                        <div class="room-image">
+                            <img src="deluxe-room.jpg" alt="Deluxe Room">
+                            <div class="room-tag highlight-tag">Đề xuất</div>
+                        </div>
+                        <div class="room-content">
+                            <h3>Phòng Deluxe</h3>
+                            <div class="room-features">
+                                <span><i class="fas fa-ruler-combined"></i> 2.5m²</span>
+                                <span><i class="fas fa-cat"></i> 1 mèo</span>
+                            </div>
+                            <p>Phòng rộng rãi với đồ chơi, cây leo trèo và không gian riêng tư.</p>
+                            <div class="room-price">
+                                <span class="price">350.000đ</span>
+                                <span class="unit">/ ngày</span>
+                            </div>
+                            <div class="card-footer">
+                                <a href="#booking" class="btn btn-primary btn-sm">Đặt ngay</a>
+                                <a href="room-detail.html" class="btn btn-outline btn-sm">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="room-card">
+                        <div class="room-image">
+                            <img src="premium-room.jpg" alt="Premium Room">
+                        </div>
+                        <div class="room-content">
+                            <h3>Phòng Premium</h3>
+                            <div class="room-features">
+                                <span><i class="fas fa-ruler-combined"></i> 4m²</span>
+                                <span><i class="fas fa-cat"></i> 2 mèo</span>
+                            </div>
+                            <p>Phòng cao cấp với nhiều tiện nghi, khu vui chơi riêng và dịch vụ VIP.</p>
+                            <div class="room-price">
+                                <span class="price">500.000đ</span>
+                                <span class="unit">/ ngày</span>
+                            </div>
+                            <div class="card-footer">
+                                <a href="#booking" class="btn btn-primary btn-sm">Đặt ngay</a>
+                                <a href="room-detail.html" class="btn btn-outline btn-sm">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-20">
+                    <a href="rooms.html" class="btn btn-secondary">Xem tất cả phòng</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact" id="contact">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Liên hệ <span class="highlight">với chúng tôi</span></h2>
+                    <p>Chúng tôi luôn sẵn sàng giải đáp mọi thắc mắc của bạn</p>
+                </div>
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Địa chỉ</h3>
+                                <p>123 Đường Mèo, Quận 1, TP. Hồ Chí Minh</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Điện thoại</h3>
+                                <p>(+84) 28 1234 5678</p>
+                                <p>(+84) 901 234 567</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Email</h3>
+                                <p>info@meowhotel.com</p>
+                                <p>booking@meowhotel.com</p>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="info-content">
+                                <h3>Giờ mở cửa</h3>
+                                <p>Thứ Hai - Chủ Nhật: 7:00 - 21:00</p>
+                                <p>Nhận phòng: 10:00 - 18:00</p>
+                            </div>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                    <div class="contact-form">
+                        <form>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="name">Họ và tên</label>
+                                    <input type="text" id="name" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="phone">Điện thoại</label>
+                                    <input type="tel" id="phone" name="phone" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="subject">Chủ đề</label>
+                                    <select id="subject" name="subject" required>
+                                        <option value="">-- Chọn chủ đề --</option>
+                                        <option value="booking">Đặt phòng</option>
+                                        <option value="info">Thông tin dịch vụ</option>
+                                        <option value="feedback">Phản hồi</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group full-width">
+                                    <label for="message">Nội dung</label>
+                                    <textarea id="message" name="message" rows="5" required></textarea>
+                                </div>
+                            </div>
+                            <div class="form-submit">
+                                <button type="submit" class="btn btn-primary">Gửi tin nhắn</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <img src="logo.png" alt="Meow Hotel Logo" class="logo-img">
+                        <h3>Meow Hotel</h3>
+                        <p>Thiên đường nghỉ dưỡng cho mèo cưng</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="footer-column">
+                            <h4>Trang chủ</h4>
+                            <ul>
+                                <li><a href="#home">Trang chủ</a></li>
+                                <li><a href="#rooms">Phòng & Giá</a></li>
+                                <li><a href="#services">Dịch vụ</a></li>
+                                <li><a href="#gallery">Thư viện</a></li>
+                                <li><a href="#about">Giới thiệu</a></li>
+                                <li><a href="#contact">Liên hệ</a></li>
+                            </ul>
+                        </div>
+                        <div class="footer-column">
+                            <h4>Dịch vụ</h4>
+                            <ul>
+                                <li><a href="services.html">Đặt phòng</a></li>
+                                <li><a href="services.html">Spa & Làm đẹp</a></li>
+                                <li><a href="services.html">Khám sức khỏe</a></li>
+                                <li><a href="services.html">Huấn luyện</a></li>
+                                <li><a href="services.html">Đón & trả mèo</a></li>
+                            </ul>
+                        </div>
+                        <div class="footer-column">
+                            <h4>Liên hệ</h4>
+                            <ul class="contact-list">
+                                <li><i class="fas fa-map-marker-alt"></i> 123 Đường Mèo, Quận 1, TP. HCM</li>
+                                <li><i class="fas fa-phone-alt"></i> (+84) 28 1234 5678</li>
+                                <li><i class="fas fa-envelope"></i> info@meowhotel.com</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Meow Hotel. Tất cả quyền được bảo lưu.</p>
+                    <div class="footer-links-bottom">
+                        <a href="privacy.html">Chính sách bảo mật</a>
+                        <a href="terms.html">Điều khoản sử dụng</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div> <!-- Kết thúc div root -->
+
+    <!-- Back to Top Button -->
+    <a href="#home" class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu
+        function openMenu() {
+            document.getElementById("navLinks").style.right = "0";
+        }
+        
+        function closeMenu() {
+            document.getElementById("navLinks").style.right = "-250px";
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Back to top button
+        window.onscroll = function() {scrollFunction()};
+        
+        function scrollFunction() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                document.getElementById("backToTop").style.display = "flex";
+            } else {
+                document.getElementById("backToTop").style.display = "none";
+            }
+        }
+
+        // Kiểm tra phần tử DOM trước khi thao tác - sửa lỗi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kiểm tra check-in và check-out inputs có tồn tại không
+            const checkInElem = document.getElementById('check-in');
+            const checkOutElem = document.getElementById('check-out');
+            
+            if (checkInElem) {
+                // Set min date to today for check-in
+                const today = new Date().toISOString().split('T')[0];
+                checkInElem.setAttribute('min', today);
+                checkInElem.value = today;
+            }
+            
+            if (checkOutElem) {
+                // Set min date to tomorrow for check-out
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                checkOutElem.setAttribute('min', tomorrowStr);
+                checkOutElem.value = tomorrowStr;
+            }
+
+            // Xử lý testimonial slider nếu các phần tử tồn tại
+            const dots = document.querySelectorAll('.dot');
+            const slides = document.querySelectorAll('.testimonial-card');
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            
+            if (slides.length > 0 && dots.length > 0) {
+                let slideIndex = 0;
+                
+                function showSlide(n) {
+                    slideIndex = n;
+                    
+                    // Hide all slides
+                    slides.forEach(slide => {
+                        slide.style.display = 'none';
+                    });
+                    
+                    // Remove active class from all dots
+                    dots.forEach(dot => {
+                        dot.classList.remove('active');
+                    });
+                    
+                    // Show current slide and activate current dot
+                    slides[slideIndex].style.display = 'block';
+                    dots[slideIndex].classList.add('active');
+                }
+                
+                // Next/previous controls
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function() {
+                        slideIndex = (slideIndex + 1) % slides.length;
+                        showSlide(slideIndex);
+                    });
+                }
+                
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function() {
+                        slideIndex = (slideIndex - 1 + slides.length) % slides.length;
+                        showSlide(slideIndex);
+                    });
+                }
+                
+                // Dot controls
+                dots.forEach((dot, index) => {
+                    dot.addEventListener('click', function() {
+                        showSlide(index);
+                    });
+                });
+                
+                // Initialize slider
+                showSlide(0);
+            }
+        });
+    </script>
+</body>
+</html>

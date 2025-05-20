@@ -12,9 +12,12 @@ const catRoutes = require('./routes/cat.routes');
 const roomRoutes = require('./routes/room.routes');
 const bookingRoutes = require('./routes/booking.routes');
 const adminRoutes = require('./routes/admin.routes');
+const adminRoomRoutes = require('./routes/admin.room.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+
 
 // Middlewares
 app.use(helmet()); // Bảo mật HTTP headers
@@ -33,6 +36,7 @@ app.use('/api/cats', catRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminRoomRoutes);
 
 // Root route
 app.get('/', (req, res) => {

@@ -16,6 +16,19 @@ class Room {
     }
   }
 
+  // Tìm phòng theo số phòng
+  static async findByRoomNumber(roomNumber) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM rooms WHERE room_number = ?',
+        [roomNumber]
+      );
+      return rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Lấy danh sách tất cả phòng
   static async getAll() {
     try {
@@ -73,6 +86,72 @@ class Room {
       throw error;
     }
   }
+
+  // Tạo phòng mới
+  static async create(roomData) {
+    try {
+      const { room_number, room_type_id, status } = roomData;
+      
+      const [result] = await pool.execute(
+        'INSERT INTO rooms (room_number, room_type_id, status) VALUES (?, ?, ?)',
+        [room_number, room_type_id, status || 'available']
+      );
+      
+      if (result.insertId) {
+        return this.findById(result.insertId);
+      }
+      return null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Cập nhật thông tin phòng
+  static async update(id, roomData) {
+    try {
+      const { room_number, room_type_id, status } = roomData;
+      
+      const [result] = await pool.execute(
+        'UPDATE rooms SET room_number = ?, room_type_id = ?, status = ? WHERE id = ?',
+        [room_number, room_type_id, status, id]
+      );
+      
+      if (result.affectedRows) {
+        return this.findById(id);
+      }
+      return null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Xóa phòng
+  static async delete(id) {
+    try {
+      const [result] = await pool.execute(
+        'DELETE FROM rooms WHERE id = ?',
+        [id]
+      );
+      
+      return result.affectedRows > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Kiểm tra phòng có đơn đặt phòng liên quan không
+  static async hasBookings(roomId) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT COUNT(*) as count FROM bookings WHERE room_id = ?',
+        [roomId]
+      );
+      
+      return rows[0].count > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 class RoomType {
@@ -96,6 +175,72 @@ class RoomType {
         [id]
       );
       return rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Tạo loại phòng mới
+  static async create(typeData) {
+    try {
+      const { name, description, price_per_day, capacity, image_url } = typeData;
+      
+      const [result] = await pool.execute(
+        'INSERT INTO room_types (name, description, price_per_day, capacity, image_url) VALUES (?, ?, ?, ?, ?)',
+        [name, description || null, price_per_day, capacity || 1, image_url || null]
+      );
+      
+      if (result.insertId) {
+        return this.findById(result.insertId);
+      }
+      return null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Cập nhật thông tin loại phòng
+  static async update(id, typeData) {
+    try {
+      const { name, description, price_per_day, capacity, image_url } = typeData;
+      
+      const [result] = await pool.execute(
+        'UPDATE room_types SET name = ?, description = ?, price_per_day = ?, capacity = ?, image_url = ? WHERE id = ?',
+        [name, description || null, price_per_day, capacity || 1, image_url, id]
+      );
+      
+      if (result.affectedRows) {
+        return this.findById(id);
+      }
+      return null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Xóa loại phòng
+  static async delete(id) {
+    try {
+      const [result] = await pool.execute(
+        'DELETE FROM room_types WHERE id = ?',
+        [id]
+      );
+      
+      return result.affectedRows > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Kiểm tra loại phòng có đang được sử dụng bởi phòng nào không
+  static async hasRooms(typeId) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT COUNT(*) as count FROM rooms WHERE room_type_id = ?',
+        [typeId]
+      );
+      
+      return rows[0].count > 0;
     } catch (error) {
       throw error;
     }

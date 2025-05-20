@@ -15,6 +15,7 @@ const AdminPanel = () => {
         <Route path="/bookings" element={<BookingManagement />} />
         <Route path="/bookings/:id" element={<BookingDetail />} />
         <Route path="/rooms" element={<RoomManagement />} />
+        <Route path="/rooms/*" element={<RoomManagement />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>

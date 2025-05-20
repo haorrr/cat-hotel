@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const RoomController = require('../controllers/room.controller');
-const { authenticateToken } = require('../middlewares/auth.middleware');
 
 // Lấy danh sách tất cả phòng
 router.get('/', RoomController.getRooms);
@@ -11,6 +10,9 @@ router.get('/available', RoomController.getAvailableRooms);
 
 // Lấy danh sách loại phòng
 router.get('/types', RoomController.getRoomTypes);
+
+// Lấy thông tin chi tiết loại phòng
+router.get('/types/:id', RoomController.getRoomTypeById);
 
 // Lấy thông tin chi tiết phòng
 router.get('/:id', RoomController.getRoomById);

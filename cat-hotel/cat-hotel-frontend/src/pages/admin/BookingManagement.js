@@ -1,61 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Table, Badge, Button, Form, Modal, Spinner, Alert, Tab, Tabs } from 'react-bootstrap';
-import { FaEdit, FaEye, FaSearch, FaFilter, FaCalendarAlt } from 'react-icons/fa';
+import { Container, Row, Col, Card, Table, Badge, Button, Form, Modal, Spinner, Alert, Tabs, Tab } from 'react-bootstrap';
+import { FaEdit, FaTrash, FaPlus, FaBed, FaTools, FaDoorOpen, FaSearch, FaFilter } from 'react-icons/fa';
+import roomService from '../../api/roomService';
 import adminService from '../../api/adminService';
-import BookingStatusBadge from '../../components/admin/BookingStatusBadge';
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
-import { Link } from 'react-router-dom';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import { Link } from 'react-router-dom';
+import RoomForm from './components/RoomForm';
+import RoomTypeForm from './components/RoomTypeForm';
+import RoomTypeCard from './components/RoomTypeCard';
 
-// Schema validation for booking status form
-const bookingStatusSchema = Yup.object().shape({
+// Schema validation for room status form
+const roomStatusSchema = Yup.object().shape({
   status: Yup.string()
     .required('Trạng thái là bắt buộc')
-    .oneOf(['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled'], 'Trạng thái không hợp lệ')
+    .oneOf(['available', 'occupied', 'maintenance'], 'Trạng thái không hợp lệ')
 });
 
-const BookingManagement = () => {
-  const [bookings, setBookings] = useState([]);
-  const [filteredBookings, setFilteredBookings] = useState([]);
-  const [selectedBooking, setSelectedBooking] = useState(null);
+const RoomManagement = () => {
+  const [rooms, setRooms] = useState([]);
+  const [roomTypes, setRoomTypes] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('all');
+  const [showRoomModal, setShowRoomModal] = useState(false);
+  const [showDeleteRoomModal, setShowDeleteRoomModal] = useState(false);
+  const [showRoomTypeModal, setShowRoomTypeModal] = useState(false);
+  const [showDeleteRoomTypeModal, setShowDeleteRoomTypeModal] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('rooms');
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const statusList = [
-    { key: 'all', label: 'Tất cả' },
-    { key: 'pending', label: 'Chờ xác nhận' },
-    { key: 'confirmed', label: 'Đã xác nhận' },
-    { key: 'checked_in', label: 'Đã nhận phòng' },
-    { key: 'checked_out', label: 'Đã trả phòng' },
-    { key: 'cancelled', label: 'Đã hủy' }
-  ];
 
-  // Fetch bookings
-  const fetchBookings = async () => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await adminService.getBookings();
-      setBookings(response.data);
-      setFilteredBookings(response.data);
+      
+      // Lấy danh sách phòng
+      const roomsResponse = await roomService.getRooms();
+      setRooms(roomsResponse.data);
+      
+      // Lấy danh sách loại phòng
+      const roomTypesResponse = await roomService.getRoomTypes();
+      setRoomTypes(roomTypesResponse.data);
+      
     } catch (error) {
-      console.error('Error fetching bookings:', error);
-      setError('Không thể tải dữ liệu đặt phòng. Vui lòng thử lại sau.');
+      console.error('Error fetching rooms data:', error);
+      setError('Không thể tải dữ liệu phòng. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchBookings();
-  }, []);
-
-  // Show success message and clear after a delay
+  // Hiển thị thông báo thành công và tự động ẩn sau 3 giây
   const showSuccess = (message) => {
     setSuccessMessage(message);
     setTimeout(() => {
@@ -63,63 +66,214 @@ const BookingManagement = () => {
     }, 3000);
   };
 
-  // Filter bookings when tab changes or search term changes
-  useEffect(() => {
-    let result = [...bookings];
-    
-    // Filter by status tab
-    if (activeTab !== 'all') {
-      result = result.filter(booking => booking.status === activeTab);
-    }
-    
-    // Filter by search term
-    if (searchTerm.trim() !== '') {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(booking => 
-        booking.user_name?.toLowerCase().includes(term) ||
-        booking.user_email?.toLowerCase().includes(term) ||
-        booking.cat_name?.toLowerCase().includes(term) ||
-        booking.room_number?.toLowerCase().includes(term) ||
-        String(booking.id).includes(term)
-      );
-    }
-    
-    setFilteredBookings(result);
-  }, [activeTab, searchTerm, bookings]);
-
-  // Handle booking status update
+  // Xử lý cập nhật trạng thái phòng
   const handleStatusUpdate = async (values, { setSubmitting }) => {
     try {
       setError('');
       
-      await adminService.updateBookingStatus(selectedBooking.id, values.status);
+      await adminService.updateRoomStatus(selectedRoom.id, values.status);
       
-      showSuccess('Cập nhật trạng thái đơn đặt phòng thành công!');
+      // Cập nhật state local
+      setRooms(rooms.map(room => {
+        if (room.id === selectedRoom.id) {
+          return { ...room, status: values.status };
+        }
+        return room;
+      }));
+      
       setShowStatusModal(false);
-      
-      // Refresh bookings list
-      fetchBookings();
+      showSuccess('Cập nhật trạng thái phòng thành công!');
       
     } catch (error) {
-      console.error('Error updating booking status:', error);
-      setError(error.response?.data?.message || 'Không thể cập nhật trạng thái đơn đặt phòng.');
+      console.error('Error updating room status:', error);
+      setError(error.response?.data?.message || 'Không thể cập nhật trạng thái phòng.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Open status modal
-  const openStatusModal = (booking) => {
-    setSelectedBooking(booking);
+  // Xử lý thêm/cập nhật phòng
+  const handleRoomSubmit = async (values, { setSubmitting, resetForm }) => {
+    try {
+      setError('');
+      
+      if (selectedRoom) {
+        // Cập nhật phòng hiện có
+        await roomService.updateRoom(selectedRoom.id, values);
+        showSuccess('Cập nhật phòng thành công!');
+      } else {
+        // Thêm phòng mới
+        await roomService.createRoom(values);
+        showSuccess('Thêm phòng mới thành công!');
+      }
+      
+      // Làm mới danh sách phòng
+      fetchData();
+      
+      if (typeof resetForm === 'function') {
+        resetForm();
+      }
+      
+      setShowRoomModal(false);
+      
+    } catch (error) {
+      console.error('Error saving room:', error);
+      setError(error.response?.data?.message || 'Không thể lưu thông tin phòng.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Xử lý xóa phòng
+  const handleDeleteRoom = async () => {
+    try {
+      setError('');
+      
+      await roomService.deleteRoom(selectedRoom.id);
+      
+      // Làm mới danh sách phòng
+      fetchData();
+      setShowDeleteRoomModal(false);
+      showSuccess('Xóa phòng thành công!');
+      
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      setError(error.response?.data?.message || 'Không thể xóa phòng. Phòng có thể đang được sử dụng.');
+    }
+  };
+
+  // Xử lý thêm/cập nhật loại phòng
+  const handleRoomTypeSubmit = async (values, { setSubmitting, resetForm }) => {
+    try {
+      setError('');
+      let result;
+      
+      if (selectedRoomType) {
+        // Cập nhật loại phòng hiện có
+        result = await roomService.updateRoomType(selectedRoomType.id, values);
+        showSuccess('Cập nhật loại phòng thành công!');
+      } else {
+        // Thêm loại phòng mới
+        result = await roomService.createRoomType(values);
+        showSuccess('Thêm loại phòng mới thành công!');
+      }
+      
+      // Làm mới danh sách loại phòng
+      fetchData();
+      
+      if (typeof resetForm === 'function') {
+        resetForm();
+      }
+      
+      setShowRoomTypeModal(false);
+      
+      // Trả về kết quả để RoomTypeForm có thể sử dụng
+      return result.data;
+      
+    } catch (error) {
+      console.error('Error saving room type:', error);
+      setError(error.response?.data?.message || 'Không thể lưu thông tin loại phòng.');
+      return null;
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Xử lý xóa loại phòng
+  const handleDeleteRoomType = async () => {
+    try {
+      setError('');
+      
+      await roomService.deleteRoomType(selectedRoomType.id);
+      
+      // Làm mới danh sách loại phòng
+      fetchData();
+      setShowDeleteRoomTypeModal(false);
+      showSuccess('Xóa loại phòng thành công!');
+      
+    } catch (error) {
+      console.error('Error deleting room type:', error);
+      setError(error.response?.data?.message || 'Không thể xóa loại phòng. Loại phòng có thể đang được sử dụng.');
+    }
+  };
+
+  // Mở modal trạng thái phòng
+  const openStatusModal = (room) => {
+    setSelectedRoom(room);
     setShowStatusModal(true);
+  };
+
+  // Mở modal thêm/sửa phòng
+  const openRoomModal = (room = null) => {
+    setSelectedRoom(room);
+    setShowRoomModal(true);
+  };
+
+  // Mở modal xóa phòng
+  const openDeleteRoomModal = (room) => {
+    setSelectedRoom(room);
+    setShowDeleteRoomModal(true);
+  };
+
+  // Mở modal thêm/sửa loại phòng
+  const openRoomTypeModal = (roomType = null) => {
+    setSelectedRoomType(roomType);
+    setShowRoomTypeModal(true);
+  };
+
+  // Mở modal xóa loại phòng
+  const openDeleteRoomTypeModal = (roomType) => {
+    setSelectedRoomType(roomType);
+    setShowDeleteRoomTypeModal(true);
+  };
+
+  // Lọc phòng theo trạng thái
+  const filteredRooms = filter === 'all' 
+    ? rooms 
+    : rooms.filter(room => room.status === filter);
+
+  // Lọc phòng theo từ khóa tìm kiếm
+  const searchFilteredRooms = searchTerm
+    ? filteredRooms.filter(room => 
+        room.room_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        room.room_type_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : filteredRooms;
+
+  // Lấy badge trạng thái
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'available':
+        return <Badge bg="success">Còn trống</Badge>;
+      case 'occupied':
+        return <Badge bg="danger">Đã đặt</Badge>;
+      case 'maintenance':
+        return <Badge bg="warning">Bảo trì</Badge>;
+      default:
+        return <Badge bg="secondary">{status}</Badge>;
+    }
+  };
+
+  // Lấy icon trạng thái
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'available':
+        return <FaDoorOpen className="text-success" />;
+      case 'occupied':
+        return <FaBed className="text-danger" />;
+      case 'maintenance':
+        return <FaTools className="text-warning" />;
+      default:
+        return <FaBed />;
+    }
   };
 
   return (
     <Container fluid className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="mb-1">Quản lý đặt phòng</h2>
-          <p className="text-muted">Quản lý tất cả các đơn đặt phòng</p>
+          <h2 className="mb-1">Quản lý phòng</h2>
+          <p className="text-muted">Quản lý tất cả các phòng, loại phòng và trạng thái</p>
         </div>
       </div>
       
@@ -135,149 +289,176 @@ const BookingManagement = () => {
         </Alert>
       )}
       
-      <Card className="shadow-sm mb-4">
-        <Card.Body>
-          <div className="booking-filter d-flex justify-content-between align-items-center mb-4">
-            <div className="search-box" style={{ width: '300px' }}>
-              <Form.Group>
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <FaSearch />
-                  </span>
+      <Tabs
+        activeKey={activeTab}
+        onSelect={(k) => setActiveTab(k)}
+        className="mb-4"
+      >
+        <Tab eventKey="rooms" title="Quản lý phòng">
+          <Card className="shadow-sm mb-4">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex align-items-center">
                   <Form.Control
                     type="text"
-                    placeholder="Tìm kiếm đơn đặt phòng..."
+                    placeholder="Tìm kiếm phòng..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className="me-2"
+                    style={{ width: '250px' }}
                   />
+                  <Form.Select 
+                    value={filter} 
+                    onChange={(e) => setFilter(e.target.value)}
+                    style={{ width: '200px' }}
+                  >
+                    <option value="all">Tất cả phòng</option>
+                    <option value="available">Còn trống</option>
+                    <option value="occupied">Đã đặt</option>
+                    <option value="maintenance">Bảo trì</option>
+                  </Form.Select>
                 </div>
-              </Form.Group>
-            </div>
-            
-            <div className="booking-actions">
-              <Button 
-                variant="outline-secondary"
-                onClick={() => {
-                  setSearchTerm('');
-                  setActiveTab('all');
-                }}
-              >
-                <FaFilter className="me-1" /> Xóa bộ lọc
-              </Button>
-            </div>
-          </div>
-          
-          <Tabs
-            activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k)}
-            className="mb-4"
-          >
-            {statusList.map(status => (
-              <Tab 
-                key={status.key} 
-                eventKey={status.key} 
-                title={
-                  <div className="d-flex align-items-center">
-                    <span>{status.label}</span>
-                    {status.key !== 'all' && (
-                      <Badge 
-                        bg="light" 
-                        text="dark" 
-                        className="ms-2"
-                      >
-                        {bookings.filter(b => b.status === status.key).length}
-                      </Badge>
-                    )}
-                  </div>
-                }
-              />
-            ))}
-          </Tabs>
-          
-          {loading ? (
-            <div className="text-center py-5">
-              <Spinner animation="border" variant="primary" />
-              <p className="mt-3">Đang tải dữ liệu đặt phòng...</p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <Table hover>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Người đặt</th>
-                    <th>Mèo</th>
-                    <th>Phòng</th>
-                    <th>Nhận phòng</th>
-                    <th>Trả phòng</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBookings.length > 0 ? (
-                    filteredBookings.map(booking => (
-                      <tr key={booking.id}>
-                        <td>#{booking.id}</td>
-                        <td>
-                          <div>{booking.user_name}</div>
-                          <small className="text-muted">{booking.user_email}</small>
-                        </td>
-                        <td>{booking.cat_name}</td>
-                        <td>{booking.room_number}</td>
-                        <td>
-                          {format(new Date(booking.check_in_date), 'dd/MM/yyyy', { locale: vi })}
-                        </td>
-                        <td>
-                          {format(new Date(booking.check_out_date), 'dd/MM/yyyy', { locale: vi })}
-                        </td>
-                        <td>{Number(booking.total_price).toLocaleString()} VNĐ</td>
-                        <td>
-                          <BookingStatusBadge status={booking.status} />
-                        </td>
-                        <td>
-                          <Button 
-                            variant="outline-primary" 
-                            size="sm"
-                            className="me-2"
-                            onClick={() => openStatusModal(booking)}
-                          >
-                            <FaEdit className="me-1" /> Đổi trạng thái
-                          </Button>
-                          <Link 
-                            to={`/admin/bookings/${booking.id}`} 
-                            className="btn btn-sm btn-outline-info"
-                          >
-                            <FaEye className="me-1" /> Chi tiết
-                          </Link>
-                        </td>
+                <Button 
+                  variant="primary"
+                  onClick={() => openRoomModal()}
+                >
+                  <FaPlus className="me-2" /> Thêm phòng mới
+                </Button>
+              </div>
+              
+              {loading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" variant="primary" />
+                  <p className="mt-3">Đang tải dữ liệu phòng...</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <Table hover>
+                    <thead>
+                      <tr>
+                        <th>Số phòng</th>
+                        <th>Loại phòng</th>
+                        <th>Giá/ngày</th>
+                        <th>Sức chứa</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
                       </tr>
+                    </thead>
+                    <tbody>
+                      {searchFilteredRooms.length > 0 ? (
+                        searchFilteredRooms.map(room => {
+                          // Tìm thông tin loại phòng
+                          const roomType = roomTypes.find(type => type.id === room.room_type_id);
+                          
+                          return (
+                            <tr key={room.id}>
+                              <td>{room.room_number}</td>
+                              <td>{room.room_type_name || roomType?.name || 'N/A'}</td>
+                              <td>{Number(room.price_per_day || roomType?.price_per_day || 0).toLocaleString()} VNĐ</td>
+                              <td>{room.capacity || roomType?.capacity || 1} mèo</td>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  {getStatusIcon(room.status)}
+                                  <span className="ms-2">{getStatusBadge(room.status)}</span>
+                                </div>
+                              </td>
+                              <td>
+                                <Button 
+                                  variant="outline-primary" 
+                                  size="sm"
+                                  className="me-2"
+                                  onClick={() => openRoomModal(room)}
+                                >
+                                  <FaEdit /> Sửa
+                                </Button>
+                                <Button 
+                                  variant="outline-danger" 
+                                  size="sm"
+                                  className="me-2"
+                                  onClick={() => openDeleteRoomModal(room)}
+                                >
+                                  <FaTrash /> Xóa
+                                </Button>
+                                <Button 
+                                  variant="outline-secondary" 
+                                  size="sm"
+                                  onClick={() => openStatusModal(room)}
+                                >
+                                  Trạng thái
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="text-center py-3">
+                            {searchTerm ? 'Không tìm thấy phòng phù hợp' : 'Không có phòng nào'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </Table>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        </Tab>
+        
+        <Tab eventKey="roomTypes" title="Quản lý loại phòng">
+          <Card className="shadow-sm mb-4">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="mb-0">Danh sách loại phòng</h5>
+                <Button 
+                  variant="primary"
+                  onClick={() => openRoomTypeModal()}
+                >
+                  <FaPlus className="me-2" /> Thêm loại phòng mới
+                </Button>
+              </div>
+              
+              {loading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" variant="primary" />
+                  <p className="mt-3">Đang tải dữ liệu loại phòng...</p>
+                </div>
+              ) : (
+                <Row>
+                  {roomTypes.length > 0 ? (
+                    roomTypes.map(roomType => (
+                      <Col lg={4} md={6} className="mb-4" key={roomType.id}>
+                        <RoomTypeCard 
+                          roomType={roomType} 
+                          onEdit={() => openRoomTypeModal(roomType)}
+                          onDelete={() => openDeleteRoomTypeModal(roomType)}
+                        />
+                      </Col>
                     ))
                   ) : (
-                    <tr>
-                      <td colSpan="9" className="text-center py-3">
-                        Không tìm thấy đơn đặt phòng nào
-                      </td>
-                    </tr>
+                    <Col xs={12}>
+                      <div className="text-center py-5 bg-light rounded">
+                        <p className="mb-0">Chưa có loại phòng nào. Hãy thêm loại phòng mới!</p>
+                      </div>
+                    </Col>
                   )}
-                </tbody>
-              </Table>
-            </div>
-          )}
-        </Card.Body>
-      </Card>
+                </Row>
+              )}
+            </Card.Body>
+          </Card>
+        </Tab>
+      </Tabs>
       
-      {/* Booking Status Modal */}
+      {/* Modal cập nhật trạng thái phòng */}
       <Modal show={showStatusModal} onHide={() => setShowStatusModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Cập nhật trạng thái đặt phòng</Modal.Title>
+          <Modal.Title>Cập nhật trạng thái phòng</Modal.Title>
         </Modal.Header>
         <Formik
           initialValues={{
-            status: selectedBooking?.status || 'pending'
+            status: selectedRoom?.status || 'available'
           }}
-          validationSchema={bookingStatusSchema}
+          validationSchema={roomStatusSchema}
           onSubmit={handleStatusUpdate}
         >
           {({
@@ -291,23 +472,11 @@ const BookingManagement = () => {
           }) => (
             <Form onSubmit={handleSubmit}>
               <Modal.Body>
-                {selectedBooking && (
+                {selectedRoom && (
                   <div className="mb-3">
-                    <h6>Thông tin đặt phòng:</h6>
-                    <p className="mb-1">
-                      <strong>ID:</strong> #{selectedBooking.id}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Khách hàng:</strong> {selectedBooking.user_name}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Mèo:</strong> {selectedBooking.cat_name}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Phòng:</strong> {selectedBooking.room_number}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Trạng thái hiện tại:</strong> <BookingStatusBadge status={selectedBooking.status} />
+                    <h5>{selectedRoom.room_number}</h5>
+                    <p className="text-muted">
+                      Trạng thái hiện tại: {getStatusBadge(selectedRoom.status)}
                     </p>
                   </div>
                 )}
@@ -321,23 +490,13 @@ const BookingManagement = () => {
                     onBlur={handleBlur}
                     isInvalid={touched.status && errors.status}
                   >
-                    <option value="pending">Chờ xác nhận</option>
-                    <option value="confirmed">Đã xác nhận</option>
-                    <option value="checked_in">Đã nhận phòng</option>
-                    <option value="checked_out">Đã trả phòng</option>
-                    <option value="cancelled">Đã hủy</option>
+                    <option value="available">Còn trống</option>
+                    <option value="occupied">Đã đặt</option>
+                    <option value="maintenance">Bảo trì</option>
                   </Form.Select>
                   <Form.Control.Feedback type="invalid">
                     {errors.status}
                   </Form.Control.Feedback>
-                  <Form.Text className="text-muted mt-2">
-                    <div className="alert alert-info p-2 mb-0 mt-2">
-                      <small>
-                        <strong>Lưu ý:</strong> Khi chuyển sang trạng thái "Đã nhận phòng", phòng sẽ được đánh dấu là "Đã đặt".
-                        Khi chuyển sang trạng thái "Đã trả phòng", phòng sẽ được đánh dấu là "Bảo trì".
-                      </small>
-                    </div>
-                  </Form.Text>
                 </Form.Group>
               </Modal.Body>
               <Modal.Footer>
@@ -356,8 +515,99 @@ const BookingManagement = () => {
           )}
         </Formik>
       </Modal>
+      
+      {/* Modal thêm/sửa phòng */}
+      <Modal 
+        show={showRoomModal} 
+        onHide={() => setShowRoomModal(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{selectedRoom ? 'Sửa thông tin phòng' : 'Thêm phòng mới'}</Modal.Title>
+        </Modal.Header>
+        <RoomForm 
+          room={selectedRoom}
+          roomTypes={roomTypes}
+          onSubmit={handleRoomSubmit}
+          onCancel={() => setShowRoomModal(false)}
+        />
+      </Modal>
+      
+      {/* Modal xác nhận xóa phòng */}
+      <Modal show={showDeleteRoomModal} onHide={() => setShowDeleteRoomModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác nhận xóa phòng</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedRoom && (
+            <p>
+              Bạn có chắc chắn muốn xóa phòng <strong>{selectedRoom.room_number}</strong>?
+              Hành động này không thể hoàn tác.
+            </p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteRoomModal(false)}>
+            Hủy
+          </Button>
+          <Button 
+            variant="danger"
+            onClick={handleDeleteRoom}
+          >
+            Xóa phòng
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      
+      {/* Modal thêm/sửa loại phòng */}
+      <Modal 
+        show={showRoomTypeModal} 
+        onHide={() => setShowRoomTypeModal(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{selectedRoomType ? 'Sửa loại phòng' : 'Thêm loại phòng mới'}</Modal.Title>
+        </Modal.Header>
+        <RoomTypeForm 
+          roomType={selectedRoomType}
+          onSubmit={handleRoomTypeSubmit}
+          onCancel={() => setShowRoomTypeModal(false)}
+        />
+      </Modal>
+      
+      {/* Modal xác nhận xóa loại phòng */}
+      <Modal show={showDeleteRoomTypeModal} onHide={() => setShowDeleteRoomTypeModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác nhận xóa loại phòng</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedRoomType && (
+            <>
+              <p>
+                Bạn có chắc chắn muốn xóa loại phòng <strong>{selectedRoomType.name}</strong>?
+                Hành động này không thể hoàn tác.
+              </p>
+              <div className="alert alert-warning">
+                <strong>Cảnh báo:</strong> Nếu có phòng nào đang sử dụng loại phòng này, 
+                việc xóa có thể sẽ không thành công hoặc gây lỗi hệ thống.
+              </div>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowDeleteRoomTypeModal(false)}>
+            Hủy
+          </Button>
+          <Button 
+            variant="danger"
+            onClick={handleDeleteRoomType}
+          >
+            Xóa loại phòng
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
 
-export default BookingManagement;
+export default RoomManagement;

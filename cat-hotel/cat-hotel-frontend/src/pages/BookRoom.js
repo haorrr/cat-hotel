@@ -314,7 +314,7 @@ const BookRoom = () => {
                           src={room.image_url} 
                           alt={room.room_type_name}
                           onError={(e) => {
-                            e.target.src = `https://via.placeholder.com/300x200?text=${room.room_type_name}`;
+                            e.target.src = `https://cdn3.ivivu.com/2014/01/SUPER-DELUXE2.jpg`;
                           }}
                         />
                         <Card.Body>

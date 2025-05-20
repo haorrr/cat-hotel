@@ -49,7 +49,7 @@ const Home = () => {
                 alt="Cat Hotel" 
                 className="img-fluid rounded shadow"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/600x400?text=Cat+Hotel';
+                  e.target.src = 'https://cdn3.ivivu.com/2014/01/SUPER-DELUXE2.jpg';
                 }}
               />
             </Col>
@@ -139,7 +139,7 @@ const Home = () => {
                       src={roomType.image_url} 
                       alt={roomType.name}
                       onError={(e) => {
-                        e.target.src = `https://via.placeholder.com/300x200?text=${roomType.name}`;
+                        e.target.src = `https://cdn3.ivivu.com/2014/01/SUPER-DELUXE2.jpg`;
                       }}
                     />
                     <Card.Body className="p-4">

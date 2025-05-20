@@ -23,6 +23,9 @@ import BookRoom from './pages/BookRoom';
 import BookingSuccess from './pages/BookingSuccess';
 import NotFound from './pages/NotFound';
 
+// Admin Pages
+import AdminPanel from './pages/admin/AdminPanel';
+
 // Styles
 import './App.css';
 
@@ -31,7 +34,12 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="d-flex flex-column min-vh-100">
-          <Header />
+          {/* Header will not show on admin routes */}
+          <Routes>
+            <Route path="/admin/*" element={null} />
+            <Route path="*" element={<Header />} />
+          </Routes>
+          
           <main className="flex-grow-1">
             <Routes>
               {/* Public Routes */}
@@ -52,22 +60,17 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
-          <Footer />
+          
+          {/* Footer will not show on admin routes */}
+          <Routes>
+            <Route path="/admin/*" element={null} />
+            <Route path="*" element={<Footer />} />
+          </Routes>
         </div>
       </AuthProvider>
       <ToastContainer position="top-right" autoClose={3000} />
     </Router>
   );
 }
-
-// Placeholder component for Admin Panel
-const AdminPanel = () => {
-  return (
-    <div className="container py-5">
-      <h1>Admin Panel</h1>
-      <p>Trang quản trị viên đang được phát triển.</p>
-    </div>
-  );
-};
 
 export default App;

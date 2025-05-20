@@ -4,7 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Component bảo vệ các route chỉ dành cho admin
 const AdminRoute = ({ children }) => {
-  const { isLoggedIn, isAdmin, loading } = useAuth();
+  const { isLoggedIn, currentUser, loading } = useAuth();
+  
+  // Check if user is admin
+  const isAdmin = currentUser?.role === 'admin';
 
   if (loading) {
     return <div>Loading...</div>;

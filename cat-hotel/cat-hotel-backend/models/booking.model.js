@@ -84,9 +84,10 @@ class Booking {
   }
 
   // Lấy tất cả booking (dành cho admin)
-  static async getAll(limit = 100, offset = 0) {
-    try {
-      const [rows] = await pool.execute(`
+static async getAll(limit = 100, offset = 0) {
+  try {
+    // Chuyển sang sử dụng query thay vì execute
+    const [rows] = await pool.query(`
         SELECT b.*, r.room_number, rt.name as room_type,
                c.name as cat_name, c.breed as cat_breed, 
                u.name as user_name, u.email as user_email
@@ -96,13 +97,13 @@ class Booking {
         JOIN cats c ON b.cat_id = c.id
         JOIN users u ON b.user_id = u.id
         ORDER BY b.created_at DESC
-        LIMIT ? OFFSET ?
-      `, [limit, offset]);
-      return rows;
-    } catch (error) {
-      throw error;
-    }
+        LIMIT ?, ?
+      `, [Number(offset), Number(limit)]);
+    return rows;
+  } catch (error) {
+    throw error;
   }
+}
 
   // Kiểm tra phòng có sẵn sàng để đặt không
   static async isRoomAvailable(roomId, checkInDate, checkOutDate) {

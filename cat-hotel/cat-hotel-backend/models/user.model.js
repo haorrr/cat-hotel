@@ -78,17 +78,18 @@ class User {
   }
 
   // Lấy danh sách users (chỉ dành cho admin)
-  static async getAll(limit = 100, offset = 0) {
-    try {
-      const [rows] = await pool.execute(
-        'SELECT id, name, email, phone, role, created_at, updated_at FROM users LIMIT ? OFFSET ?',
-        [limit, offset]
-      );
-      return rows;
-    } catch (error) {
-      throw error;
-    }
+static async getAll(limit = 100, offset = 0) {
+  try {
+    // Chuyển sang sử dụng query thay vì execute
+    const [rows] = await pool.query(
+      'SELECT id, name, email, phone, role, created_at, updated_at FROM users LIMIT ?, ?',
+      [Number(offset), Number(limit)]
+    );
+    return rows;
+  } catch (error) {
+    throw error;
   }
+}
 }
 
 module.exports = User;

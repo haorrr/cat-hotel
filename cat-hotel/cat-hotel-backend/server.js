@@ -37,7 +37,14 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin', adminRoomRoutes);
+const serviceRoutes = require('./routes/service.routes');
+const foodRoutes = require('./routes/food.routes');
 
+// Đăng ký routes
+app.use('/api/services', serviceRoutes);
+app.use('/api/foods', foodRoutes);
+app.use('/api/admin/services', serviceRoutes);
+app.use('/api/admin/foods', foodRoutes);
 // Root route
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Cat Hotel API' });
